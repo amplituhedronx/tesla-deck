@@ -6,7 +6,9 @@ const state = {
   lastAlt: null,
   lastAltTs: 0,
   smoothAlt: null,
-  vs: null,
+  vs: 0,
+  vsReady: false,
+  altLog: [],
   minAlt: null,
   maxAlt: null,
   lastElevFetch: 0,
@@ -68,11 +70,12 @@ function fmtHdg(h) {
   return `${Math.round(h)}\u00b0 <span class="u">${dirs[i]}</span>`;
 }
 function fmtVs(mps) {
-  if (mps == null || Number.isNaN(mps)) return "\u2014";
+  if (!state.vsReady || mps == null || Number.isNaN(mps)) return "\u2014";
   const perMin = mps * 60;
   const v = state.unit === "ft" ? perMin * 3.28084 : perMin;
-  const sign = v > 0.4 ? "+" : v < -0.4 ? "" : "";
-  return `${sign}${Math.round(v)} ${state.unit}/min`;
+  const rounded = Math.round(v);
+  if (rounded > 0) return `+${rounded} ${state.unit}/min`;
+  return `${rounded} ${state.unit}/min`;
 }
 
 function setStatus(kind, text) {
@@ -89,6 +92,43 @@ function distM(a, b) {
   const la2 = b.lat * Math.PI / 180;
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+function updateVerticalSpeed(alt) {
+  const now = Date.now();
+  const log = state.altLog;
+  if (!log.length || now - log[log.length - 1].t >= 400) {
+    log.push({ t: now, alt: alt });
+  } else {
+    log[log.length - 1] = { t: now, alt: alt };
+  }
+  while (log.length && now - log[0].t > 25000) log.shift();
+  while (log.length > 40) log.shift();
+
+  if (log.length < 2) return;
+  const span = (log[log.length - 1].t - log[0].t) / 1000;
+  if (span < 2) return;
+
+  let sumT = 0, sumA = 0, sumTT = 0, sumTA = 0;
+  const t0 = log[0].t;
+  for (const p of log) {
+    const t = (p.t - t0) / 1000;
+    sumT += t;
+    sumA += p.alt;
+    sumTT += t * t;
+    sumTA += t * p.alt;
+  }
+  const n = log.length;
+  const den = n * sumTT - sumT * sumT;
+  if (Math.abs(den) < 1e-6) {
+    state.vs = 0;
+    state.vsReady = true;
+    return;
+  }
+  const slope = (n * sumTA - sumT * sumA) / den;
+  if (!Number.isFinite(slope)) return;
+  state.vs = state.vsReady ? state.vs * 0.55 + slope * 0.45 : slope;
+  state.vsReady = true;
 }
 
 async function fetchTerrain(lat, lon) {
@@ -113,21 +153,14 @@ async function fetchTerrain(lat, lon) {
 function render(pos) {
   const c = pos.coords;
   const gpsAlt = c.altitude;
-  if (gpsAlt != null) {
+  if (gpsAlt != null && Number.isFinite(gpsAlt)) {
     if (state.smoothAlt == null) state.smoothAlt = gpsAlt;
     else state.smoothAlt = state.smoothAlt * 0.72 + gpsAlt * 0.28;
     if (state.minAlt == null || gpsAlt < state.minAlt) state.minAlt = gpsAlt;
     if (state.maxAlt == null || gpsAlt > state.maxAlt) state.maxAlt = gpsAlt;
-    const t = pos.timestamp || Date.now();
-    if (state.lastAlt != null && t > state.lastAltTs) {
-      const dt = (t - state.lastAltTs) / 1000;
-      if (dt >= 0.8 && dt < 15) {
-        const raw = (gpsAlt - state.lastAlt) / dt;
-        state.vs = state.vs == null ? raw : state.vs * 0.65 + raw * 0.35;
-      }
-    }
+    updateVerticalSpeed(gpsAlt);
     state.lastAlt = gpsAlt;
-    state.lastAltTs = t;
+    state.lastAltTs = Date.now();
   }
 
   $("alt").textContent = fmtAlt(state.smoothAlt);
