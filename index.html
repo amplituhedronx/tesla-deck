@@ -27,339 +27,62 @@
       --r: 8px;
       --touch: 72px;
     }
-
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
-      margin: 0;
-      height: 100%;
-      background: var(--bg);
-      color: var(--ink);
+      margin: 0; height: 100%; background: var(--bg); color: var(--ink);
       font-family: Inter, "Universal Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-weight: 400;
-      letter-spacing: -0.01em;
-      overflow: hidden;
-      user-select: none;
+      font-weight: 400; letter-spacing: -0.01em; overflow: hidden; user-select: none;
     }
-
-    body {
-      display: flex;
-      flex-direction: column;
-      padding: 20px 24px 18px;
-      gap: 16px;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 44px;
-      flex-shrink: 0;
-    }
-
-    .brand {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-    }
-    .brand h1 {
-      margin: 0;
-      font-size: 15px;
-      font-weight: 500;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--dim);
-    }
+    body { display: flex; flex-direction: column; padding: 20px 24px 18px; gap: 16px; }
+    header { display: flex; align-items: center; justify-content: space-between; min-height: 44px; flex-shrink: 0; }
+    .brand { display: flex; align-items: baseline; gap: 10px; }
+    .brand h1 { margin: 0; font-size: 15px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+    .status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
     .dot.live { background: var(--ok); box-shadow: 0 0 0 4px rgba(61, 214, 140, 0.15); }
     .dot.wait { background: var(--warn); }
     .dot.off { background: var(--bad); }
-
-    .units {
-      display: flex;
-      background: var(--surface);
-      border-radius: 6px;
-      padding: 3px;
-    }
-    .units button {
-      appearance: none;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      font: inherit;
-      font-size: 14px;
-      font-weight: 500;
-      padding: 8px 16px;
-      border-radius: 4px;
-      min-height: 40px;
-    }
-    .units button.on {
-      background: var(--surface-3);
-      color: var(--ink);
-    }
-
-    main {
-      flex: 1;
-      display: grid;
-      grid-template-rows: 1fr auto auto;
-      gap: 16px;
-      min-height: 0;
-    }
-
-    .hero {
-      background: var(--surface);
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 24px 20px;
-      position: relative;
-      min-height: 0;
-    }
-
-    .hero-label {
-      position: absolute;
-      top: 16px;
-      left: 20px;
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--dim);
-    }
-
-    .alt-wrap {
-      display: flex;
-      align-items: flex-end;
-      gap: 14px;
-      line-height: 0.85;
-    }
-    .alt {
-      font-size: clamp(88px, 22vh, 168px);
-      font-weight: 500;
-      letter-spacing: -0.04em;
-      font-variant-numeric: tabular-nums;
-    }
-    .alt-unit {
-      font-size: clamp(18px, 3.4vh, 28px);
-      font-weight: 500;
-      color: var(--muted);
-      padding-bottom: 14px;
-      letter-spacing: 0.04em;
-    }
-
-    .alt-meta {
-      margin-top: 14px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px 18px;
-      color: var(--muted);
-      font-size: 15px;
-    }
-    .alt-meta b {
-      color: var(--ink);
-      font-weight: 500;
-    }
-
-    .chips {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-    .chip {
-      background: var(--surface);
-      border-radius: var(--r);
-      padding: 14px 16px 12px;
-      min-height: 76px;
-    }
-    .chip .k {
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--dim);
-      margin-bottom: 6px;
-    }
-    .chip .v {
-      font-size: 22px;
-      font-weight: 500;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .chip .u {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 400;
-    }
-
-    .shortcuts-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-    .shortcuts-head span {
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--dim);
-    }
-    .shortcuts-head button {
-      appearance: none;
-      border: 0;
-      background: transparent;
-      color: var(--blue);
-      font: inherit;
-      font-size: 14px;
-      font-weight: 500;
-      padding: 8px 4px;
-    }
-
-    .shortcuts {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-    .slot {
-      appearance: none;
-      border: 0;
-      background: var(--surface);
-      color: var(--ink);
-      border-radius: var(--r);
-      min-height: var(--touch);
-      font: inherit;
-      font-size: 16px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 0 12px;
-    }
-    .slot.empty {
-      color: var(--dim);
-      border: 1px dashed var(--line);
-      background: transparent;
-    }
+    .units { display: flex; background: var(--surface); border-radius: 6px; padding: 3px; }
+    .units button { appearance: none; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 4px; min-height: 40px; }
+    .units button.on { background: var(--surface-3); color: var(--ink); }
+    main { flex: 1; display: grid; grid-template-rows: 1fr auto auto; gap: 16px; min-height: 0; }
+    .hero { background: var(--surface); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 24px 20px; position: relative; min-height: 0; }
+    .hero-label { position: absolute; top: 16px; left: 20px; font-size: 13px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+    .alt-wrap { display: flex; align-items: flex-end; gap: 14px; line-height: 0.85; }
+    .alt { font-size: clamp(88px, 22vh, 168px); font-weight: 500; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+    .alt-unit { font-size: clamp(18px, 3.4vh, 28px); font-weight: 500; color: var(--muted); padding-bottom: 14px; letter-spacing: 0.04em; }
+    .alt-meta { margin-top: 14px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; color: var(--muted); font-size: 15px; }
+    .alt-meta b { color: var(--ink); font-weight: 500; }
+    .chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .chip { background: var(--surface); border-radius: var(--r); padding: 14px 16px 12px; min-height: 76px; }
+    .chip .k { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+    .chip .v { font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chip .u { font-size: 13px; color: var(--muted); font-weight: 400; }
+    .shortcuts-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .shortcuts-head span { font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+    .shortcuts-head button { appearance: none; border: 0; background: transparent; color: var(--blue); font: inherit; font-size: 14px; font-weight: 500; padding: 8px 4px; }
+    .shortcuts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .slot { appearance: none; border: 0; background: var(--surface); color: var(--ink); border-radius: var(--r); min-height: var(--touch); font: inherit; font-size: 16px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 12px; }
+    .slot.empty { color: var(--dim); border: 1px dashed var(--line); background: transparent; }
     .slot:active { background: var(--surface-2); }
-
-    .gate {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.72);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
+    .gate { position: absolute; inset: 0; background: rgba(0,0,0,0.72); display: none; align-items: center; justify-content: center; padding: 24px; }
     .gate.show { display: flex; }
-    .gate-card {
-      background: var(--surface);
-      border-radius: 12px;
-      padding: 28px 28px 24px;
-      max-width: 420px;
-      text-align: center;
-    }
-    .gate-card h2 {
-      margin: 0 0 8px;
-      font-size: 22px;
-      font-weight: 500;
-    }
-    .gate-card p {
-      margin: 0 0 20px;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.45;
-    }
-    .cta {
-      appearance: none;
-      border: 0;
-      background: var(--blue);
-      color: #fff;
-      font: inherit;
-      font-size: 16px;
-      font-weight: 500;
-      border-radius: 4px;
-      min-height: 52px;
-      width: 100%;
-    }
+    .gate-card { background: var(--surface); border-radius: 12px; padding: 28px 28px 24px; max-width: 420px; text-align: center; }
+    .gate-card h2 { margin: 0 0 8px; font-size: 22px; font-weight: 500; }
+    .gate-card p { margin: 0 0 20px; color: var(--muted); font-size: 15px; line-height: 1.45; }
+    .cta { appearance: none; border: 0; background: var(--blue); color: #fff; font: inherit; font-size: 16px; font-weight: 500; border-radius: 4px; min-height: 52px; width: 100%; }
     .cta:active { background: var(--blue-press); }
-
-    .modal {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.72);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
+    .modal { position: absolute; inset: 0; background: rgba(0,0,0,0.72); display: none; align-items: center; justify-content: center; padding: 24px; }
     .modal.show { display: flex; }
-    .modal-card {
-      background: var(--surface);
-      border-radius: 12px;
-      padding: 24px;
-      width: min(520px, 100%);
-    }
-    .modal-card h2 {
-      margin: 0 0 16px;
-      font-size: 20px;
-      font-weight: 500;
-    }
-    label {
-      display: block;
-      font-size: 12px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--dim);
-      margin: 12px 0 6px;
-    }
-    input {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--line);
-      color: var(--ink);
-      font: inherit;
-      font-size: 16px;
-      border-radius: 4px;
-      padding: 14px 12px;
-      outline: none;
-    }
+    .modal-card { background: var(--surface); border-radius: 12px; padding: 24px; width: min(520px, 100%); }
+    .modal-card h2 { margin: 0 0 16px; font-size: 20px; font-weight: 500; }
+    label { display: block; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); margin: 12px 0 6px; }
+    input { width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--ink); font: inherit; font-size: 16px; border-radius: 4px; padding: 14px 12px; outline: none; }
     input:focus { border-color: var(--blue); }
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .btn-ghost, .btn-danger {
-      appearance: none;
-      border: 0;
-      font: inherit;
-      font-size: 16px;
-      font-weight: 500;
-      border-radius: 4px;
-      min-height: 48px;
-      flex: 1;
-    }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-ghost, .btn-danger { appearance: none; border: 0; font: inherit; font-size: 16px; font-weight: 500; border-radius: 4px; min-height: 48px; flex: 1; }
     .btn-ghost { background: var(--surface-3); color: var(--ink); }
     .btn-danger { background: transparent; color: var(--bad); }
-
     @media (max-height: 700px) {
       .alt { font-size: clamp(72px, 18vh, 120px); }
       .chip { min-height: 64px; padding: 10px 12px; }
@@ -384,7 +107,6 @@
       <button id="btnFt">ft</button>
     </div>
   </header>
-
   <main>
     <section class="hero">
       <div class="hero-label">Altitude</div>
@@ -399,14 +121,12 @@
         <span>Session <b id="session">—</b></span>
       </div>
     </section>
-
     <section class="chips">
       <div class="chip"><div class="k">Latitude</div><div class="v" id="lat">—</div></div>
       <div class="chip"><div class="k">Longitude</div><div class="v" id="lon">—</div></div>
       <div class="chip"><div class="k">Speed</div><div class="v" id="spd">—</div></div>
       <div class="chip"><div class="k">Heading</div><div class="v" id="hdg">—</div></div>
     </section>
-
     <section>
       <div class="shortcuts-head">
         <span>Shortcuts</span>
@@ -415,15 +135,13 @@
       <div class="shortcuts" id="shortcutRow"></div>
     </section>
   </main>
-
   <div class="gate" id="gate">
     <div class="gate-card">
-      <h2>Location needed</h2>
-      <p>Allow location so Deck can read GPS altitude from the car. Tesla will prompt once.</p>
+      <h2 id="gateTitle">Enable location</h2>
+      <p id="gateText">Safari only allows GPS after you tap. Allow location on the next prompt.</p>
       <button class="cta" id="askLoc" type="button">Enable location</button>
     </div>
   </div>
-
   <div class="modal" id="modal">
     <div class="modal-card">
       <h2 id="modalTitle">Shortcut</h2>
@@ -438,263 +156,6 @@
       </div>
     </div>
   </div>
-
-  <script>
-    const $ = (id) => document.getElementById(id);
-    const state = {
-      unit: localStorage.getItem("deck-unit") || "m",
-      watchId: null,
-      lastPos: null,
-      lastAlt: null,
-      lastAltTs: 0,
-      smoothAlt: null,
-      vs: null,
-      minAlt: null,
-      maxAlt: null,
-      lastElevFetch: 0,
-      lastElevAt: null,
-      terrain: null,
-      editMode: false,
-      editIndex: -1,
-      shortcuts: loadShortcuts()
-    };
-
-    function loadShortcuts() {
-      try {
-        const raw = JSON.parse(localStorage.getItem("deck-shortcuts") || "[]");
-        if (Array.isArray(raw) && raw.length) return raw.slice(0, 4);
-      } catch (_) {}
-      return [null, null, null, null];
-    }
-    function saveShortcuts() {
-      localStorage.setItem("deck-shortcuts", JSON.stringify(state.shortcuts));
-    }
-
-    function setUnit(u) {
-      state.unit = u;
-      localStorage.setItem("deck-unit", u);
-      $("btnM").classList.toggle("on", u === "m");
-      $("btnFt").classList.toggle("on", u === "ft");
-      $("altUnit").textContent = u;
-      if (state.lastPos) render(state.lastPos);
-    }
-
-    function fmtAlt(m) {
-      if (m == null || Number.isNaN(m)) return "—";
-      const v = state.unit === "ft" ? m * 3.28084 : m;
-      return Math.round(v).toString();
-    }
-    function fmtAlt1(m) {
-      if (m == null || Number.isNaN(m)) return "—";
-      const v = state.unit === "ft" ? m * 3.28084 : m;
-      return (Math.round(v * 10) / 10).toFixed(1);
-    }
-    function fmtCoord(n, digits) {
-      if (n == null) return "—";
-      return n.toFixed(digits);
-    }
-    function fmtSpeed(mps) {
-      if (mps == null || Number.isNaN(mps)) return "—";
-      if (state.unit === "ft") {
-        const mph = mps * 2.23694;
-        return `${Math.round(mph)}<span class="u"> mph</span>`;
-      }
-      const kmh = mps * 3.6;
-      return `${Math.round(kmh)}<span class="u"> km/h</span>`;
-    }
-    function fmtHdg(h) {
-      if (h == null || Number.isNaN(h)) return "—";
-      const dirs = ["N","NE","E","SE","S","SW","W","NW"];
-      const i = Math.round(h / 45) % 8;
-      return `${Math.round(h)}° <span class="u">${dirs[i]}</span>`;
-    }
-    function fmtVs(mps) {
-      if (mps == null || Number.isNaN(mps)) return "—";
-      const perMin = mps * 60;
-      const v = state.unit === "ft" ? perMin * 3.28084 : perMin;
-      const sign = v > 0.4 ? "+" : v < -0.4 ? "" : "";
-      return `${sign}${Math.round(v)} ${state.unit}/min`;
-    }
-
-    function setStatus(kind, text) {
-      const dot = $("dot");
-      dot.className = "dot " + kind;
-      $("statusText").textContent = text;
-    }
-
-    function distM(a, b) {
-      const R = 6371000;
-      const dLat = (b.lat - a.lat) * Math.PI / 180;
-      const dLon = (b.lon - a.lon) * Math.PI / 180;
-      const la1 = a.lat * Math.PI / 180;
-      const la2 = b.lat * Math.PI / 180;
-      const h = Math.sin(dLat/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;
-      return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
-    }
-
-    async function fetchTerrain(lat, lon) {
-      const now = Date.now();
-      if (now - state.lastElevFetch < 20000) return;
-      if (state.lastElevAt && distM(state.lastElevAt, { lat, lon }) < 40) return;
-      state.lastElevFetch = now;
-      try {
-        const url = `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("elev");
-        const data = await res.json();
-        const el = Array.isArray(data.elevation) ? data.elevation[0] : data.elevation;
-        if (typeof el === "number") {
-          state.terrain = el;
-          state.lastElevAt = { lat, lon };
-          $("terrainAlt").textContent = fmtAlt1(el) + " " + state.unit;
-        }
-      } catch (_) {
-        /* keep last terrain value */
-      }
-    }
-
-    function render(pos) {
-      const c = pos.coords;
-      const gpsAlt = c.altitude;
-      if (gpsAlt != null) {
-        if (state.smoothAlt == null) state.smoothAlt = gpsAlt;
-        else state.smoothAlt = state.smoothAlt * 0.72 + gpsAlt * 0.28;
-        if (state.minAlt == null || gpsAlt < state.minAlt) state.minAlt = gpsAlt;
-        if (state.maxAlt == null || gpsAlt > state.maxAlt) state.maxAlt = gpsAlt;
-        const t = pos.timestamp || Date.now();
-        if (state.lastAlt != null && t > state.lastAltTs) {
-          const dt = (t - state.lastAltTs) / 1000;
-          if (dt >= 0.8 && dt < 15) {
-            const raw = (gpsAlt - state.lastAlt) / dt;
-            state.vs = state.vs == null ? raw : state.vs * 0.65 + raw * 0.35;
-          }
-        }
-        state.lastAlt = gpsAlt;
-        state.lastAltTs = t;
-      }
-
-      $("alt").textContent = fmtAlt(state.smoothAlt);
-      $("gpsAlt").textContent = fmtAlt1(gpsAlt) + " " + state.unit;
-      $("terrainAlt").textContent = state.terrain == null ? "—" : (fmtAlt1(state.terrain) + " " + state.unit);
-      $("vs").textContent = fmtVs(state.vs);
-      if (state.minAlt != null) {
-        $("session").textContent = fmtAlt(state.minAlt) + " – " + fmtAlt(state.maxAlt);
-      }
-      $("lat").textContent = fmtCoord(c.latitude, 5);
-      $("lon").textContent = fmtCoord(c.longitude, 5);
-      $("spd").innerHTML = fmtSpeed(c.speed);
-      $("hdg").innerHTML = fmtHdg(c.heading);
-
-      const acc = c.accuracy;
-      if (acc != null && acc <= 12) setStatus("live", "GPS lock");
-      else if (acc != null && acc <= 40) setStatus("live", "GPS ±" + Math.round(acc) + " m");
-      else if (acc != null) setStatus("wait", "GPS ±" + Math.round(acc) + " m");
-      else setStatus("live", "GPS live");
-
-      if (c.latitude != null) fetchTerrain(c.latitude, c.longitude);
-    }
-
-    function onError(err) {
-      if (err && err.code === 1) {
-        setStatus("off", "Location blocked");
-        $("gate").classList.add("show");
-      } else {
-        setStatus("wait", err && err.message ? err.message : "GPS timeout");
-      }
-    }
-
-    function startWatch() {
-      if (!navigator.geolocation) {
-        setStatus("off", "No geolocation");
-        $("gate").classList.add("show");
-        return;
-      }
-      if (state.watchId != null) navigator.geolocation.clearWatch(state.watchId);
-      $("gate").classList.remove("show");
-      setStatus("wait", "Acquiring GPS");
-      state.watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          state.lastPos = pos;
-          render(pos);
-        },
-        onError,
-        { enableHighAccuracy: true, maximumAge: 1000, timeout: 12000 }
-      );
-    }
-
-    function renderShortcuts() {
-      const row = $("shortcutRow");
-      row.innerHTML = "";
-      for (let i = 0; i < 4; i++) {
-        const item = state.shortcuts[i];
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "slot" + (item && item.url ? "" : " empty");
-        if (state.editMode) {
-          btn.textContent = item && item.label ? item.label : "Empty";
-        } else if (item && item.url) {
-          btn.textContent = item.label || "Open";
-        } else {
-          btn.textContent = "+";
-        }
-        btn.addEventListener("click", () => {
-          if (state.editMode || !item || !item.url) openEditor(i);
-          else window.location.href = item.url;
-        });
-        row.appendChild(btn);
-      }
-      $("editShortcuts").textContent = state.editMode ? "Done" : "Edit";
-    }
-
-    function openEditor(i) {
-      state.editIndex = i;
-      const item = state.shortcuts[i] || {};
-      $("modalTitle").textContent = "Shortcut " + (i + 1);
-      $("scLabel").value = item.label || "";
-      $("scUrl").value = item.url || "";
-      $("modal").classList.add("show");
-    }
-
-    function closeEditor() {
-      $("modal").classList.remove("show");
-      state.editIndex = -1;
-    }
-
-    $("btnM").addEventListener("click", () => setUnit("m"));
-    $("btnFt").addEventListener("click", () => setUnit("ft"));
-    $("askLoc").addEventListener("click", startWatch);
-    $("editShortcuts").addEventListener("click", () => {
-      state.editMode = !state.editMode;
-      renderShortcuts();
-    });
-    $("scCancel").addEventListener("click", closeEditor);
-    $("scDelete").addEventListener("click", () => {
-      if (state.editIndex >= 0) {
-        state.shortcuts[state.editIndex] = null;
-        saveShortcuts();
-        renderShortcuts();
-      }
-      closeEditor();
-    });
-    $("scSave").addEventListener("click", () => {
-      let url = $("scUrl").value.trim();
-      const label = $("scLabel").value.trim();
-      if (url && !/^https?:\/\//i.test(url)) url = "https://" + url;
-      if (state.editIndex >= 0) {
-        state.shortcuts[state.editIndex] = url ? { label: label || "Link", url } : null;
-        saveShortcuts();
-        renderShortcuts();
-      }
-      closeEditor();
-    });
-
-    setUnit(state.unit);
-    renderShortcuts();
-    startWatch();
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") startWatch();
-    });
-  </script>
+  <script src="app.js" defer></script>
 </body>
 </html>
