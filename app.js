@@ -2,13 +2,13 @@ const $ = (id) => document.getElementById(id);
 const state = {
   unit: localStorage.getItem("deck-unit") || "m",
   watchId: null,
+  pollId: null,
   lastPos: null,
   lastAlt: null,
   lastAltTs: 0,
   smoothAlt: null,
   vs: 0,
   vsReady: false,
-  altLog: [],
   minAlt: null,
   maxAlt: null,
   lastElevFetch: 0,
@@ -70,12 +70,9 @@ function fmtHdg(h) {
   return `${Math.round(h)}\u00b0 <span class="u">${dirs[i]}</span>`;
 }
 function fmtVs(mps) {
-  if (!state.vsReady || mps == null || Number.isNaN(mps)) return "\u2014";
-  const perMin = mps * 60;
-  const v = state.unit === "ft" ? perMin * 3.28084 : perMin;
-  const rounded = Math.round(v);
-  if (rounded > 0) return `+${rounded} ${state.unit}/min`;
-  return `${rounded} ${state.unit}/min`;
+  if (!state.vsReady || mps == null || Number.isNaN(mps)) return "0 " + state.unit + "/min";
+  const v = Math.round(mps * 60 * (state.unit === "ft" ? 3.28084 : 1));
+  return (v > 0 ? "+" : "") + v + " " + state.unit + "/min";
 }
 
 function setStatus(kind, text) {
@@ -94,41 +91,34 @@ function distM(a, b) {
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
-function updateVerticalSpeed(alt) {
+function updateClimb(alt, speed) {
   const now = Date.now();
-  const log = state.altLog;
-  if (!log.length || now - log[log.length - 1].t >= 400) {
-    log.push({ t: now, alt: alt });
-  } else {
-    log[log.length - 1] = { t: now, alt: alt };
-  }
-  while (log.length && now - log[0].t > 25000) log.shift();
-  while (log.length > 40) log.shift();
+  state.vsReady = true;
 
-  if (log.length < 2) return;
-  const span = (log[log.length - 1].t - log[0].t) / 1000;
-  if (span < 2) return;
-
-  let sumT = 0, sumA = 0, sumTT = 0, sumTA = 0;
-  const t0 = log[0].t;
-  for (const p of log) {
-    const t = (p.t - t0) / 1000;
-    sumT += t;
-    sumA += p.alt;
-    sumTT += t * t;
-    sumTA += t * p.alt;
-  }
-  const n = log.length;
-  const den = n * sumTT - sumT * sumT;
-  if (Math.abs(den) < 1e-6) {
-    state.vs = 0;
-    state.vsReady = true;
+  if (speed != null && speed < 0.5) {
+    state.vs *= 0.4;
+    if (Math.abs(state.vs) < 0.03) state.vs = 0;
+    state.lastAlt = alt;
+    state.lastAltTs = now;
     return;
   }
-  const slope = (n * sumTA - sumT * sumA) / den;
-  if (!Number.isFinite(slope)) return;
-  state.vs = state.vsReady ? state.vs * 0.55 + slope * 0.45 : slope;
-  state.vsReady = true;
+
+  if (state.lastAlt == null || !state.lastAltTs) {
+    state.vs = 0;
+    state.lastAlt = alt;
+    state.lastAltTs = now;
+    return;
+  }
+
+  const dt = (now - state.lastAltTs) / 1000;
+  if (dt < 0.2) return;
+
+  const inst = (alt - state.lastAlt) / dt;
+  if (!Number.isFinite(inst)) return;
+  state.vs = state.vs * 0.75 + inst * 0.25;
+  if (Math.abs(state.vs) < 0.02) state.vs = 0;
+  state.lastAlt = alt;
+  state.lastAltTs = now;
 }
 
 async function fetchTerrain(lat, lon) {
@@ -158,9 +148,7 @@ function render(pos) {
     else state.smoothAlt = state.smoothAlt * 0.72 + gpsAlt * 0.28;
     if (state.minAlt == null || gpsAlt < state.minAlt) state.minAlt = gpsAlt;
     if (state.maxAlt == null || gpsAlt > state.maxAlt) state.maxAlt = gpsAlt;
-    updateVerticalSpeed(gpsAlt);
-    state.lastAlt = gpsAlt;
-    state.lastAltTs = Date.now();
+    updateClimb(gpsAlt, c.speed);
   }
 
   $("alt").textContent = fmtAlt(state.smoothAlt);
@@ -210,7 +198,6 @@ function onError(err) {
     showGate("No GPS fix", "Location is allowed, but the phone has no fix yet. Go outside or toggle Location Services off and on, then tap Enable location again.");
   } else if (code === 3) {
     setStatus("wait", "GPS timeout");
-    showGate("GPS timed out", "No fix in time. Stay on this page, wait a few seconds, then tap Enable location again.");
   } else {
     setStatus("wait", err && err.message ? err.message : "GPS error");
   }
@@ -241,18 +228,32 @@ function startWatch() {
     (pos) => {
       state.lastPos = pos;
       render(pos);
-      state.watchId = navigator.geolocation.watchPosition(
-        (next) => {
-          state.lastPos = next;
-          render(next);
-        },
-        onError,
-        opts
-      );
     },
     onError,
     opts
   );
+  state.watchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      state.lastPos = pos;
+      render(pos);
+    },
+    onError,
+    opts
+  );
+  if (state.pollId) clearInterval(state.pollId);
+  state.pollId = setInterval(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        state.lastPos = pos;
+        render(pos);
+      },
+      () => {
+        if (state.lastAlt != null) updateClimb(state.lastAlt, 0);
+        if (state.lastPos) $("vs").textContent = fmtVs(state.vs);
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
+    );
+  }, 1000);
 }
 
 function renderShortcuts() {
