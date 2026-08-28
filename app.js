@@ -1,4 +1,5 @@
 const $ = (id) => document.getElementById(id);
+const CLIMB_WINDOW_MS = 4000;
 const state = {
   unit: localStorage.getItem("deck-unit") || "m",
   watchId: null,
@@ -6,6 +7,8 @@ const state = {
   lastPos: null,
   lastAlt: null,
   lastAltTs: 0,
+  lastClimbSample: 0,
+  climbLog: [],
   smoothAlt: null,
   vs: 0,
   vsReady: false,
@@ -91,34 +94,38 @@ function distM(a, b) {
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
-function updateClimb(alt, speed) {
+function sampleClimb(smoothAlt, speed) {
   const now = Date.now();
+  if (smoothAlt == null || !Number.isFinite(smoothAlt)) return;
   state.vsReady = true;
 
-  if (speed != null && speed < 0.5) {
-    state.vs *= 0.4;
-    if (Math.abs(state.vs) < 0.03) state.vs = 0;
-    state.lastAlt = alt;
-    state.lastAltTs = now;
-    return;
-  }
+  if (now - state.lastClimbSample < 800) return;
+  state.lastClimbSample = now;
 
-  if (state.lastAlt == null || !state.lastAltTs) {
+  const spd = speed == null || !Number.isFinite(speed) ? 0 : speed;
+  const log = state.climbLog;
+  log.push({ t: now, alt: smoothAlt, speed: spd });
+  while (log.length && now - log[0].t > 10000) log.shift();
+
+  const avgSpeed = log.reduce((s, p) => s + p.speed, 0) / log.length;
+  if (avgSpeed < 1.2) {
     state.vs = 0;
-    state.lastAlt = alt;
-    state.lastAltTs = now;
     return;
   }
 
-  const dt = (now - state.lastAltTs) / 1000;
-  if (dt < 0.2) return;
+  let older = null;
+  for (const p of log) {
+    if (now - p.t >= CLIMB_WINDOW_MS) older = p;
+  }
+  if (!older) return;
 
-  const inst = (alt - state.lastAlt) / dt;
-  if (!Number.isFinite(inst)) return;
-  state.vs = state.vs * 0.75 + inst * 0.25;
-  if (Math.abs(state.vs) < 0.02) state.vs = 0;
-  state.lastAlt = alt;
-  state.lastAltTs = now;
+  const dt = (now - older.t) / 1000;
+  if (dt < 2) return;
+  const raw = (smoothAlt - older.alt) / dt;
+  if (!Number.isFinite(raw)) return;
+
+  state.vs = state.vs * 0.65 + raw * 0.35;
+  if (Math.abs(state.vs) * 60 < 6) state.vs = 0;
 }
 
 async function fetchTerrain(lat, lon) {
@@ -148,7 +155,8 @@ function render(pos) {
     else state.smoothAlt = state.smoothAlt * 0.72 + gpsAlt * 0.28;
     if (state.minAlt == null || gpsAlt < state.minAlt) state.minAlt = gpsAlt;
     if (state.maxAlt == null || gpsAlt > state.maxAlt) state.maxAlt = gpsAlt;
-    updateClimb(gpsAlt, c.speed);
+    state.lastAlt = gpsAlt;
+    sampleClimb(state.smoothAlt, c.speed);
   }
 
   $("alt").textContent = fmtAlt(state.smoothAlt);
@@ -247,10 +255,7 @@ function startWatch() {
         state.lastPos = pos;
         render(pos);
       },
-      () => {
-        if (state.lastAlt != null) updateClimb(state.lastAlt, 0);
-        if (state.lastPos) $("vs").textContent = fmtVs(state.vs);
-      },
+      () => {},
       { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
     );
   }, 1000);
