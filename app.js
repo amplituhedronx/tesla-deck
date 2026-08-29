@@ -11,6 +11,7 @@ const state = {
   climbLog: [],
   smoothAlt: null,
   vs: 0,
+  grade: 0,
   vsReady: false,
   minAlt: null,
   maxAlt: null,
@@ -77,6 +78,12 @@ function fmtVs(mps) {
   const v = Math.round(mps * 60 * (state.unit === "ft" ? 3.28084 : 1));
   return (v > 0 ? "+" : "") + v + " " + state.unit + "/min";
 }
+function fmtGrade(p) {
+  if (p == null || !Number.isFinite(p)) return "0%";
+  const v = Math.round(p * 10) / 10;
+  if (Math.abs(v) < 0.3) return "0%";
+  return (v > 0 ? "+" : "") + v.toFixed(1) + "%";
+}
 
 function setStatus(kind, text) {
   const dot = $("dot");
@@ -110,6 +117,7 @@ function sampleClimb(smoothAlt, speed) {
   const avgSpeed = log.reduce((s, p) => s + p.speed, 0) / log.length;
   if (avgSpeed < 1.2) {
     state.vs = 0;
+    state.grade = 0;
     return;
   }
 
@@ -121,11 +129,22 @@ function sampleClimb(smoothAlt, speed) {
 
   const dt = (now - older.t) / 1000;
   if (dt < 2) return;
-  const raw = (smoothAlt - older.alt) / dt;
-  if (!Number.isFinite(raw)) return;
+  const rise = smoothAlt - older.alt;
+  const rawVs = rise / dt;
+  if (!Number.isFinite(rawVs)) return;
 
-  state.vs = state.vs * 0.65 + raw * 0.35;
+  state.vs = state.vs * 0.65 + rawVs * 0.35;
   if (Math.abs(state.vs) * 60 < 6) state.vs = 0;
+
+  const run = avgSpeed * dt;
+  if (run < 8) {
+    state.grade = 0;
+    return;
+  }
+  const rawGrade = (rise / run) * 100;
+  if (!Number.isFinite(rawGrade)) return;
+  state.grade = state.grade * 0.65 + rawGrade * 0.35;
+  if (Math.abs(state.grade) < 0.3) state.grade = 0;
 }
 
 async function fetchTerrain(lat, lon) {
@@ -163,6 +182,7 @@ function render(pos) {
   $("gpsAlt").textContent = fmtAlt1(gpsAlt) + " " + state.unit;
   $("terrainAlt").textContent = state.terrain == null ? "\u2014" : fmtAlt1(state.terrain) + " " + state.unit;
   $("vs").textContent = fmtVs(state.vs);
+  $("grade").textContent = fmtGrade(state.grade);
   if (state.minAlt != null) {
     $("session").textContent = fmtAlt(state.minAlt) + " \u2013 " + fmtAlt(state.maxAlt);
   }
