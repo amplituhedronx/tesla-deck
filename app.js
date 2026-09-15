@@ -101,6 +101,11 @@ function distM(a, b) {
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
+function zeroClimb() {
+  state.vs = 0;
+  state.grade = 0;
+}
+
 function sampleClimb(smoothAlt, speed) {
   const now = Date.now();
   if (smoothAlt == null || !Number.isFinite(smoothAlt)) return;
@@ -116,8 +121,7 @@ function sampleClimb(smoothAlt, speed) {
 
   const avgSpeed = log.reduce((s, p) => s + p.speed, 0) / log.length;
   if (avgSpeed < 1.2) {
-    state.vs = 0;
-    state.grade = 0;
+    zeroClimb();
     return;
   }
 
@@ -129,22 +133,24 @@ function sampleClimb(smoothAlt, speed) {
 
   const dt = (now - older.t) / 1000;
   if (dt < 2) return;
+
   const rise = smoothAlt - older.alt;
-  const rawVs = rise / dt;
-  if (!Number.isFinite(rawVs)) return;
-
-  state.vs = state.vs * 0.65 + rawVs * 0.35;
-  if (Math.abs(state.vs) * 60 < 6) state.vs = 0;
-
   const run = avgSpeed * dt;
-  if (run < 8) {
-    state.grade = 0;
+  if (!Number.isFinite(rise) || run < 8) {
+    zeroClimb();
     return;
   }
+
   const rawGrade = (rise / run) * 100;
   if (!Number.isFinite(rawGrade)) return;
+
   state.grade = state.grade * 0.65 + rawGrade * 0.35;
-  if (Math.abs(state.grade) < 0.3) state.grade = 0;
+  if (Math.abs(state.grade) < 0.3) {
+    zeroClimb();
+    return;
+  }
+
+  state.vs = (state.grade / 100) * avgSpeed;
 }
 
 async function fetchTerrain(lat, lon) {
